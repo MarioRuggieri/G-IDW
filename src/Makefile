@@ -3,6 +3,7 @@ CC=nvcc
 CFLAGS=-I$(IDIR)
 
 ODIR=obj
+dummy_build_folder := $(shell mkdir -p $(ODIR))
 
 LIBS=-lm
 
