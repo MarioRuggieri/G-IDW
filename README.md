@@ -23,6 +23,7 @@ e-mail: livia.marcellino@uniparthenope.it
   cd src
   make
   ```
+In this way you are making `demo` binary file
 	
 **Demo usage**
 
