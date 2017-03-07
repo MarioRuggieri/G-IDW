@@ -1,4 +1,4 @@
-# Parallel GPU Inverse Distance Weigthing
+# Parallel GPU Inverse Distance Weighting
 A parallel GPU version of the IDW interpolation algorithm [1]
 
 Language: C, Framework: CUDA 7.0 
