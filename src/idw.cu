@@ -27,7 +27,7 @@ __global__ void parallelIDW(Point *knownPoints, Point2D *queryPoints, float *zVa
     
     z = 0; wSum = 0; shift = 0;
     currentKN = MAX_SHMEM_SIZE;	//chunk current dimension
-    if (ind < QN) myPoint = queryPoints[ind]; // some block threads are not used
+    //if (ind < QN) myPoint = queryPoints[ind]; // some block threads are not used
     
     // each iteration fills as much as possible shared memory
     for (k = 0; k < nIter; k++)
@@ -58,21 +58,25 @@ __global__ void parallelIDW(Point *knownPoints, Point2D *queryPoints, float *zVa
         /* --- loading finished --- */
         
         // updating the interpolated z value for each thread
-        for (i = 0; i < currentKN-shift; i++)
+        if (ind < QN)
         {
-            p = shMem[i];
+            myPoint = queryPoints[ind];
+            for (i = 0; i < currentKN-shift; i++)
+            {
+                p = shMem[i];
 
-            d = sqrt(pow(myPoint.x - p.x, 2) + pow(myPoint.y - p.y, 2));
-            if (d != 0)
-            {
-               	w = pow(d,-2);
-            	z += w*p.z; wSum += w;
-            }
-            else
-            {
-                z = p.z; wSum = 1;
-                k = nIter;
-                break; 
+                d = sqrt(pow(myPoint.x - p.x, 2) + pow(myPoint.y - p.y, 2));
+                if (d != 0)
+                {
+                   	w = pow(d,-2);
+                	z += w*p.z; wSum += w;
+                }
+                else
+                {
+                    z = p.z; wSum = 1;
+                    k = nIter;
+                    break; 
+                }
             }
         }
         
@@ -281,6 +285,27 @@ void getMaxAbsError(float *zValues, float *zValuesGPU, int QN, float *maxErr)
             *maxErr = err;
     }
 }
+
+float getRes(float *ref, float *result, int QN)
+{
+    int i;
+    float res = 0, ref_norm = 0;
+
+    for (i = 0; i < QN; i++)
+    {
+        ref_norm += ref[i]*ref[i];
+    }
+
+    ref_norm = sqrt(ref_norm);
+
+    for (i = 0; i < QN; i++)
+    {
+        res += (ref[i]-result[i])*(ref[i]-result[i]);
+    }
+
+    return sqrt(res)/ref_norm;
+}
+
 
 float getSTD(float xm, float x[], int N)
 {

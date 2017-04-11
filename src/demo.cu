@@ -74,7 +74,7 @@ int main(int argc, char **argv)
 
     /* -- CPU -- */
     cpuMeanTime = 0;
-    for (int j=0; j<N_ITER; j++)
+    for (int j=0; j<1; j++)
     {
         cpuStartTime = clock();
     
@@ -96,7 +96,7 @@ int main(int argc, char **argv)
 
     /* -- GPU -- */
     gpuMeanTime = 0;
-    for (int j=0; j<N_ITER; j++)
+    for (int j=0; j<1; j++)
     {
 
         /*cudaStreamCreate(&stream1);
@@ -146,9 +146,7 @@ int main(int argc, char **argv)
         printf("Log updated\n");
     */
 
-    getMaxAbsError(zValues, zValuesGPU, QN, &maxErr);
-    printf("Max abs error: %f\n", maxErr);
-
+    printf("Forward error: %e\n", getRes(zValues,zValuesGPU,QN));
     /*
     if (saveData(knownPoints, KN, queryPoints, zValues, zValuesGPU, QN, cpuElapsedTime, gpuElapsedTime) != -1)
         printf("\nResults saved!\n");
