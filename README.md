@@ -16,7 +16,7 @@ e-mail: livia.marcellino@uniparthenope.it
   
 # Installation and Usage 
 
-`src/demo.cu` is an example of usage on random data. It launches 25 times the CPU and GPU algorithms and shows for both the mean time and standard deviation.
+`src/demo.cu` is an example of usage on random data. It launches 25 times the CPU and GPU algorithms and shows for both the average execution time and standard deviation.
 
 **Demo installation**
   ```
