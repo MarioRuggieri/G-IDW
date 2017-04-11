@@ -42,6 +42,8 @@ int updateLogCpuGpu(float gpuMeanTime, float cpuMeanTime, float gpuSTD, float cp
 
 void getMaxAbsError(float *zValues, float *zValuesGPU, int QN, float *maxErr);
 
+float getRes(float *ref, float *result, int QN);
+
 float getSTD(float xm, float x[], int N);
 
 void showData(Point *p, Point2D *pp, int N, int M);
