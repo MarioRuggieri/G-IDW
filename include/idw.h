@@ -7,7 +7,8 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#define MAX_SHMEM_SIZE 4096
+#define PI 3.14159265
+#define R 6371e3
 
 struct point
 {
@@ -24,9 +25,11 @@ typedef struct point2D Point2D;
 
 void checkCUDAError(const char* msg);
 
-__device__ float dist(Point2D a, Point b);
+__device__ float havesineDistGPU(Point2D p1, Point p2);
 
-__global__ void parallelIDW(Point *knownPoints, Point2D *queryPoints, float *zValues, int KN, int QN,int stride, int nIter);
+__global__ void parallelIDW(Point *knownPoints, Point2D *queryPoints, float *zValues, int KN, int QN,int stride, int nIter, int MAX_SHMEM_SIZE);
+
+float havesineDistCPU(Point2D p1, Point p2);
 
 float cpuDist(Point2D a, Point b);
 

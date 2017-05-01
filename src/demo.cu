@@ -10,7 +10,7 @@ int main(int argc, char **argv)
     
     Point 	*knownPoints, *devKP;	
     Point2D *queryPoints, *devQP;	
-    int KN, QN, sizeKP, sizeQP, stride, shMemSize, nIter; 	
+    int KN, QN, sizeKP, sizeQP, stride, shMemSize, MAX_SHMEM_SIZE, nIter; 	
     
     // grid managing
     dim3 nBlocks, nThreadsForBlock;
@@ -20,6 +20,8 @@ int main(int argc, char **argv)
     float   cpuElapsedTime[N_ITER], cpuMeanTime, cpuSTD, 
             gpuElapsedTime[N_ITER], gpuMeanTime, gpuSTD;
     clock_t cpuStartTime;
+
+    cudaDeviceProp prop;
     
     if (argc > 3)
     {
@@ -31,11 +33,14 @@ int main(int argc, char **argv)
     else
     {
         printf("\nUsage:\n\n ./[bin_name] [known_points_number] [locations_number] [block_threads_number]\n\n");
-	exit(-1);
+	   exit(-1);
     }
     
     sizeKP = KN*sizeof(Point);
     sizeQP = QN*sizeof(Point2D);
+
+    cudaGetDeviceProperties(&prop,0);
+    MAX_SHMEM_SIZE = prop.sharedMemPerBlock/sizeof(Point);
     
     // known points are more than shared memory size?
     if (KN < MAX_SHMEM_SIZE)
@@ -61,7 +66,7 @@ int main(int argc, char **argv)
     cudaMalloc((void**)&devZV, QN*sizeof(float));
 
     // generating random data for testing
-    generateRandomData(knownPoints, queryPoints, 0, 100, KN, QN);
+    generateRandomData(knownPoints, queryPoints, 0, 90, KN, QN);
     
     printf("Data generated!\n\n");
 
@@ -74,7 +79,7 @@ int main(int argc, char **argv)
 
     /* -- CPU -- */
     cpuMeanTime = 0;
-    for (int j=0; j<1; j++)
+    for (int j=0; j<N_ITER; j++)
     {
         cpuStartTime = clock();
     
@@ -92,11 +97,12 @@ int main(int argc, char **argv)
 
     printf("Elapsed CPU MEAN time : %f s\n", cpuMeanTime);
     printf("CPU std: %f\n\n", cpuSTD);
+   
     /* --- END --- */
 
     /* -- GPU -- */
     gpuMeanTime = 0;
-    for (int j=0; j<1; j++)
+    for (int j=0; j<N_ITER; j++)
     {
 
         /*cudaStreamCreate(&stream1);
@@ -113,7 +119,7 @@ int main(int argc, char **argv)
         cudaMemcpy(devQP, queryPoints, sizeQP, cudaMemcpyHostToDevice);//, stream2);
         //cudaStreamWaitEvent(stream2, event, 0);
 
-        parallelIDW<<<nBlocks,nThreadsForBlock,shMemSize>>>(devKP, devQP, devZV, KN, QN, stride, nIter);
+        parallelIDW<<<nBlocks,nThreadsForBlock,shMemSize>>>(devKP, devQP, devZV, KN, QN, stride, nIter, MAX_SHMEM_SIZE);
     
         cudaMemcpy(zValuesGPU, devZV, QN*sizeof(float), cudaMemcpyDeviceToHost);
 
@@ -146,11 +152,13 @@ int main(int argc, char **argv)
         printf("Log updated\n");
     */
 
+    getMaxAbsError(zValues, zValuesGPU, QN, &maxErr);
+    printf("Max abs error: %e\n", maxErr);
+
     printf("Forward error: %e\n", getRes(zValues,zValuesGPU,QN));
-    /*
-    if (saveData(knownPoints, KN, queryPoints, zValues, zValuesGPU, QN, cpuElapsedTime, gpuElapsedTime) != -1)
+
+    if (saveData(knownPoints, KN, queryPoints, zValues, zValuesGPU, QN, cpuElapsedTime[0], gpuElapsedTime[0]) != -1)
         printf("\nResults saved!\n");
-    */
   
     free(knownPoints); free(queryPoints); free(zValues); free(zValuesGPU);
     cudaFree(devKP); cudaFree(devQP); cudaFree(devZV);

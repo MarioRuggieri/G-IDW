@@ -11,13 +11,20 @@ void checkCUDAError(const char* msg)
     }
 }
 
-__device__ float dist(Point2D a, Point b)
+__device__ float havesineDistGPU(Point2D p1, Point p2)
 {
-    return sqrt(pow(a.x - b.x, 2) + pow(a.y - b.y, 2));
+    float   lat1 = PI*p1.y/180,
+            lat2 = PI*p2.y/180,
+            dlat = PI*(p2.y-p1.y)/180,
+            dlon = PI*(p2.x-p1.x)/180,
+            a = sin(dlat/2) * sin(dlat/2) + cos(lat1) * cos(lat2) * sin(dlon/2) * sin(dlon/2),
+            c = 2 * atan2(sqrt(a), sqrt(1-a));
+
+    return R * c;
 }
 
 // IDW parallel GPU version
-__global__ void parallelIDW(Point *knownPoints, Point2D *queryPoints, float *zValues, int KN, int QN, int stride, int nIter)
+__global__ void parallelIDW(Point *knownPoints, Point2D *queryPoints, float *zValues, int KN, int QN, int stride, int nIter, int MAX_SHMEM_SIZE)
 {
     extern __shared__ Point shMem[];
     int ind = threadIdx.x + blockIdx.x*blockDim.x, smStartInd, startInd, i, k, currentKN, shift;
@@ -65,7 +72,9 @@ __global__ void parallelIDW(Point *knownPoints, Point2D *queryPoints, float *zVa
             {
                 p = shMem[i];
 
-                d = sqrt(pow(myPoint.x - p.x, 2) + pow(myPoint.y - p.y, 2));
+                //d = sqrt(pow(myPoint.x - p.x, 2) + pow(myPoint.y - p.y, 2));
+                d = havesineDistGPU(myPoint,p);
+
                 if (d != 0)
                 {
                    	w = pow(d,-2);
@@ -91,9 +100,16 @@ __global__ void parallelIDW(Point *knownPoints, Point2D *queryPoints, float *zVa
     if (ind < QN) zValues[ind] = z/wSum;
 }
 
-float cpuDist(Point2D a, Point b)
+float havesineDistCPU(Point2D p1, Point p2)
 {
-    return sqrt(pow(a.x - b.x, 2) + pow(a.y - b.y, 2));
+    float   lat1 = PI*p1.y/180,
+            lat2 = PI*p2.y/180,
+            dlat = PI*(p2.y-p1.y)/180,
+            dlon = PI*(p2.x-p1.x)/180,
+            a = sin(dlat/2) * sin(dlat/2) + cos(lat1) * cos(lat2) * sin(dlon/2) * sin(dlon/2),
+            c = 2 * atan2(sqrt(a), sqrt(1-a));
+
+    return R * c;
 }
 
 // IDW sequential CPU version
@@ -108,7 +124,8 @@ void sequentialIDW(Point *knownPoints, Point2D *queryPoints, float *zValues, int
 
         for (j=0; j<KN; j++)
         {
-            d = sqrt(pow(queryPoints[i].x - knownPoints[j].x, 2) + pow(queryPoints[i].y - knownPoints[j].y, 2));
+            d = havesineDistCPU(queryPoints[i],knownPoints[j]);
+            //d = sqrt(pow(queryPoints[i].x - knownPoints[j].x, 2) + pow(queryPoints[i].y - knownPoints[j].y, 2));
 
             if (d != 0)
             {
