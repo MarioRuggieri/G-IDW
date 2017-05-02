@@ -27,7 +27,7 @@ __device__ float havesineDistGPU(Point2D p1, Point p2)
 __global__ void parallelIDW(Point *knownPoints, Point2D *queryPoints, float *zValues, int KN, int QN, int stride, int nIter, int MAX_SHMEM_SIZE)
 {
     extern __shared__ Point shMem[];
-    int ind = threadIdx.x + blockIdx.x*blockDim.x, smStartInd, startInd, i, k, currentKN, shift;
+    int ind = threadIdx.x + blockIdx.x*blockDim.x, smStartInd, startInd, i, k, currentKN, shift, work = 1;
     float wSum, z, w, d;
     Point2D myPoint;
     Point p;
@@ -41,9 +41,9 @@ __global__ void parallelIDW(Point *knownPoints, Point2D *queryPoints, float *zVa
     {
         //the last or only one iteration
         if (currentKN > KN) currentKN = KN;
-        
+            
         /* --- loading known points into shared memory --- */
-        
+            
         smStartInd = threadIdx.x*stride;
 
         //shift used to move into knownPoints array for chunk selection
@@ -51,50 +51,51 @@ __global__ void parallelIDW(Point *knownPoints, Point2D *queryPoints, float *zVa
 
         if (startInd < currentKN) 
         {
-            i = 0;
-            while (i < stride && (startInd + i) < currentKN) // for the last thread: <= stride points
-            {
-                shMem[smStartInd + i] = knownPoints[startInd + i];
-                i++;
+                i = 0;
+                while (i < stride && (startInd + i) < currentKN) // for the last thread: <= stride points
+                {
+                    shMem[smStartInd + i] = knownPoints[startInd + i];
+                    i++;
+                }
             }
-        }
-
 
         __syncthreads();
         
         /* --- loading finished --- */
-        
-        // updating the interpolated z value for each thread
-        if (ind < QN)
+        if (work) 
         {
-            myPoint = queryPoints[ind];
-            for (i = 0; i < currentKN-shift; i++)
+            // updating the interpolated z value for each thread
+            if (ind < QN)
             {
-                p = shMem[i];
-
-                //d = sqrt(pow(myPoint.x - p.x, 2) + pow(myPoint.y - p.y, 2));
-                d = havesineDistGPU(myPoint,p);
-
-                if (d != 0)
+                myPoint = queryPoints[ind];
+                for (i = 0; i < currentKN-shift; i++)
                 {
-                   	w = pow(d,-2);
-                	z += w*p.z; wSum += w;
+                    p = shMem[i];
+
+                    //d = sqrt(pow(myPoint.x - p.x, 2) + pow(myPoint.y - p.y, 2));
+                    d = havesineDistGPU(myPoint,p);
+
+                    if (d != 0)
+                    {
+                       	w = pow(d,-2);
+                    	z += w*p.z; wSum += w;
+                    }
+                    else
+                    {
+                        z = p.z; wSum = 1;
+                        work = 0;
+                        break; 
+                    }
                 }
-                else
-                {
-                    z = p.z; wSum = 1;
-                    k = nIter;
-                    break; 
-                }
-            }
+            }   
         }
-        
-        shift = currentKN;
-        currentKN += MAX_SHMEM_SIZE;        
 
-        __syncthreads();
-        
+        __syncthreads(); 
+
+        shift = currentKN;
+        currentKN += MAX_SHMEM_SIZE;    
     }
+
     
     // here z and wSum are the final ones
     if (ind < QN) zValues[ind] = z/wSum;
