@@ -152,8 +152,8 @@ int main(int argc, char **argv)
         printf("Log updated\n");
     */
 
-    getMaxAbsError(zValues, zValuesGPU, QN, &maxErr);
-    printf("Max abs error: %e\n", maxErr);
+    /*getMaxAbsError(zValues, zValuesGPU, QN, &maxErr);
+    printf("Max abs error: %e\n", maxErr);*/
 
     printf("Forward error: %e\n", getRes(zValues,zValuesGPU,QN));
 
