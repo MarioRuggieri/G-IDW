@@ -25,29 +25,35 @@ typedef struct point2D Point2D;
 
 void checkCUDAError(const char* msg);
 
-__device__ float havesineDistGPU(Point2D p1, Point p2);
+__device__ float haversineDistGPU(Point2D p1, Point p2);
 
-__global__ void parallelIDW(Point *knownPoints, Point2D *queryPoints, float *zValues, int KN, int QN,int stride, int nIter, int MAX_SHMEM_SIZE);
+__global__ void parallelIDW(Point *knownPoints, Point2D *queryPoints, float *zValues, int KN, int QN, int stride, int nIter, int maxShmemSize, float searchRadius);
 
-float havesineDistCPU(Point2D p1, Point p2);
+float haversineDistCPU(Point2D p1, Point p2);
 
 float cpuDist(Point2D a, Point b);
 
-void sequentialIDW(Point *knownPoints, Point2D *queryPoints, float *zValues, int KN, int QN);
+int sequentialIDW(Point *knownPoints, Point2D *queryPoints, float *zValues, int KN, int QN, float searchRadius);
 
 void generateRandomData(Point *knownPoints, Point2D *queryPoints, int a, int b, int N, int M);
 
+int getLines(char *filename);
+
+void generateDataset(char *filename, Point *knownLocations);
+
+void generateGrid(char *filename, Point2D *queryLocations);
+
 int saveData(Point *knownPoints, int KN, Point2D *queryPoints, float *zValues, float *zValuesGPU, int QN, float cpuElapsedTime, float gpuElaspedTime);
 
-int updateLog(float gpuMeanTime, int QN, int KN, int nBlocks, int nThreadsForBlock);
+int updateLog(float gpuElapsedTime, int QN, int KN, int nBlocks, int nThreadsForBlock);
 
-int updateLogCpuGpu(float gpuMeanTime, float cpuMeanTime, float gpuSTD, float cpuSTD, int QN, int KN, int nBlocks, int nThreadsForBlock);
+int updateLogCpuGpu(float gpuElapsedTime, float cpuElapsedTime, int QN, int KN, int nBlocks, int nThreadsForBlock);
 
-void getMaxAbsError(float *zValues, float *zValuesGPU, int QN, float *maxErr);
+/*void getMaxAbsError(float *zValues, float *zValuesGPU, int QN, float *maxErr);
+
+float getSTD(float xm, float x[], int N);*/
 
 float getRes(float *ref, float *result, int QN);
-
-float getSTD(float xm, float x[], int N);
 
 void showData(Point *p, Point2D *pp, int N, int M);
 
