@@ -1,9 +1,9 @@
 # Parallel GPU Inverse Distance Weighting
 A parallel GPU version of the IDW interpolation algorithm [1]
 
-Language: C, Framework: CUDA 7.0 
+Language: C, Framework: CUDA 8.0 
 
-Software inspired by [2]
+Software developed for [2]
 
 # Authors
 Mario Ruggieri
@@ -59,5 +59,5 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # References
 [1] Shepard D. , A two-dimensional interpolation function for irregularly-spaced data, Proceedings of the 1968 ACM National Conference. pp. 517–524 
 
-[2] Hennebohl K., Appel M., Pebesma E. , Spatial Interpolation in Massively Parallel Computing Environments, Institute for Geoinformatics, University of Muenster, 2011 
+[2] Marcellino L., Montella R., Kosta S., Galletti A., Di Luccio D., Santopietro V., Ruggieri M., Lapegna M., Laccetti G., Using GPGPU accelerated interpolation algorithms for marine bathymetry processing with on-premises and cloud based computational resources, 2017 (Submitted)
 
