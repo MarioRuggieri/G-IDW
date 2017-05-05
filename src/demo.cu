@@ -20,8 +20,6 @@ int main(int argc, char **argv)
     clock_t cpuStartTime;
 
     cudaDeviceProp prop;
-
-    cudaSetDevice(1);
     
     if (argc > 5)
     {
@@ -71,7 +69,7 @@ int main(int argc, char **argv)
     sizeQP = QN*sizeof(Point2D);
     nBlocks.x = ceil((float)QN/(float)nThreadsForBlock.x);
 
-    cudaGetDeviceProperties(&prop,1);
+    cudaGetDeviceProperties(&prop,0);
     maxShmemSize = prop.sharedMemPerBlock/sizeof(Point);
     
     // known points are more than shared memory size?
