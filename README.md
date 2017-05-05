@@ -39,7 +39,7 @@ In this way you are making `demo` binary file
 
 Examples:
 
-	./demo 1 dataset.txt locations1k.txt 256 400
+	./demo 1 dataset.txt grid.txt 256 400
 	./demo 2 20000 300000 256 400
 	
 CPU and GPU output are saved into the current directory.
