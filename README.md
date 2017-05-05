@@ -44,6 +44,22 @@ Examples:
 	
 CPU and GPU output are saved into the current directory.
 
+Each line of the dataset file must have this layout: longitude;latitude;z;
+
+For example:
+
+	13.70104167;40.84895833;-702.20;
+	13.70312500;40.84895833;-700.20;
+	...
+
+Each line of the grid file (query locations) must have this layout: longitude;latitude;
+
+For example:
+
+	13.70104167;40.55104167;
+	13.70154225;40.55104167;
+	...
+
 # Version
 This is a beta version made for academic purposes.
 	
