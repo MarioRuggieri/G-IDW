@@ -59,6 +59,8 @@ For example:
 	13.70104167;40.55104167;
 	13.70154225;40.55104167;
 	...
+	
+Software uses single-precision floating-points.
 
 # Version
 This is a beta version made for academic purposes.
