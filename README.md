@@ -27,15 +27,26 @@ In this way you are making `demo` binary file
 	
 **Demo usage**
 
-* 1th argument: number of known points
+* 1th argument: type of usage (1 = file, 2 = random data)
 
-* 2th argument: number of values to interpolate
+* 2th argument: (type 1) known 3D points dataset file / (type 2) number of known values
 
-* 3th argument : number of CUDA block threads
+* 3th argument : (type 1) 2D locations file / (type 2) number of values to interpolate
 
-Example:
+* 4th argument : number of CUDA block threads
 
-	./demo 10000 1000 100
+* 5th argument : search radius
+
+Examples:
+
+	./demo 1 dataset.txt locations1k.txt 256 400
+	./demo 2 20000 300000 256 400
+	
+CPU and GPU output are saved into the current directory.
+
+* dataset.txt contains an example dataset of 45147 3D points
+* locations1k.txt contains 1000 2D locations to calculate values
+* locations200k.txt contains 219076 2D locations to calculate values
 
 # Version
 This is a beta version made for academic purposes.
