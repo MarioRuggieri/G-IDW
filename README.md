@@ -44,10 +44,6 @@ Examples:
 	
 CPU and GPU output are saved into the current directory.
 
-* dataset.txt contains an example dataset of 45147 3D points
-* locations1k.txt contains 1000 2D locations to calculate values
-* locations200k.txt contains 219076 2D locations to calculate values
-
 # Version
 This is a beta version made for academic purposes.
 	
