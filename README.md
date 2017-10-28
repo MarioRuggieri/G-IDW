@@ -6,7 +6,7 @@ Language: C, Framework: CUDA 8.0
 # Authors
 Mario Ruggieri
 
-e-mail: mario.ruggieri@studenti.uniparthenope.it
+e-mail: mario.ruggieri@uniparthenope.it
 
 Livia Marcellino
 
